@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;
 using System;
-using Microservice.basvuru.domain.Entity;
 
 namespace Microservice.notification.Services
 {
@@ -39,11 +38,11 @@ namespace Microservice.notification.Services
                     var body = ea.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);
 
-                    var basvuru = JsonSerializer.Deserialize<MusteriBasvuru>(message);
+                    //var basvuru = JsonSerializer.Deserialize<MusteriBasvuru>(message);
 
-                    Console.WriteLine($"📥 Başvuru alındı: {basvuru?.MusteriBasvuru_UID} - {basvuru?.Basvurutipi}");
+                    //Console.WriteLine($"📥 Başvuru alındı: {basvuru?.MusteriBasvuru_UID} - {basvuru?.Basvurutipi}");
 
-                   
+
                 }
                 catch (Exception ex)
                 {
@@ -53,7 +52,7 @@ namespace Microservice.notification.Services
 
             await channel.BasicConsumeAsync(
                 queue: "basvuru_queue",
-                autoAck: true, 
+                autoAck: true,
                 consumer: consumer);
 
             while (!stoppingToken.IsCancellationRequested)

@@ -12,6 +12,9 @@ using System.Security.Claims;
 using RabbitMQ.Client;
 using System.Text;
 using Microservice.basvuru.api.Services;
+using StackExchange.Redis;
+using Newtonsoft.Json;
+using Microservice.Shared.DTO;
 
 namespace Microservice.basvuru.api.Controllers
 {
@@ -20,10 +23,15 @@ namespace Microservice.basvuru.api.Controllers
     public class BasvuruController : ControllerBase
     {
         private readonly BasvuruDbContext _context;
+        private readonly IDatabase _redisDb;
 
         public BasvuruController(BasvuruDbContext context)
         {
+            var redis = ConnectionMultiplexer.Connect("localhost:6379");
+
             _context = context;
+            _redisDb = redis.GetDatabase();
+
 
         }
 
@@ -33,30 +41,40 @@ namespace Microservice.basvuru.api.Controllers
             var list = _context.Basvurular.ToList();
             return Ok(list);
         }
-       
-        [HttpPost("musteriform")]
-        public async Task<IActionResult> MusteriForm([FromBody] MusteriBasvuruDto dto, [FromServices] RabbitMqProducer producer)
+        public class MusteriBasvuruRequest
         {
+            public int BasvuruTipi  { get; set; } // Client’tan gelen tek alan
+        }
+
+
+        [HttpPost("musteriform")]
+        public async Task<IActionResult> MusteriForm(
+         [FromBody] MusteriBasvuruDto request,
+         [FromHeader(Name = "Session-Id")] string sessionId) 
+        {
+            var userData = _redisDb.StringGet(sessionId);
+            if (userData.IsNullOrEmpty)
+                return Unauthorized("Session geçersiz veya süresi dolmuş");
+
+            var user = JsonConvert.DeserializeObject<UserSessionDto>(userData);
+
             var basvuru = new MusteriBasvuru
             {
-                MusteriBasvuru_UID = dto.MusteriBasvuru_UID,
-                Basvurutipi = dto.Basvurutipi,
+                MusteriBasvuru_UID = user.UserId,      
+                Basvurutipi = request.Basvurutipi,     
                 BasvuruTarihi = DateTime.Now,
                 BasvuruDurum = Durum.Beklemede,
                 Kayit_Durum = "Aktif",
-                HataAciklama="",
-                MusteriNo = dto.MusteriNo ?? "Unknown",
-                Kayit_Yapan = User.Identity?.Name ?? "Unknown",
+                HataAciklama = "",
+                MusteriNo = user.MusteriNo,           
+                Kayit_Yapan = user.Username,           
                 Kayit_Zaman = DateTime.Now
             };
 
             _context.Basvurular.Add(basvuru);
             await _context.SaveChangesAsync();
-
-            producer.SendMessage(basvuru, "basvuru_queue");
-
-            return Ok(new { message = "Başvuru oluşturuldu ve kuyruğa eklendi." });
+            return Ok(new { message = "Başvuru odu ve kuyruğa eklendi." });
         }
-
     }
 }
+

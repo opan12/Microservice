@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace Microservice.basvuru.insfrasture.Repository
 {
     public class BasvuruRepository : IBasvuruRepository
+
     {
         private readonly BasvuruDbContext _context;
 

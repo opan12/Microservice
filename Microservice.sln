@@ -35,8 +35,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Notification", "Notificatio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microservice.notification", "Notification\Microservice.notification\Microservice.notification.csproj", "{FFB7EA77-F24D-48F6-9BA8-9AC0DD643689}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Çözüm Öğeleri", "Çözüm Öğeleri", "{0D886CFC-AA9E-49A1-9610-15AC488C14A4}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{6FA79193-FCFF-4B68-BBFE-AA05868624F6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microservice.Shared.DTO", "Shared\Microservice.Shared.DTO\Microservice.Shared.DTO.csproj", "{3FD0DF52-D7B7-48D1-901D-FDBDCDAFF581}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Çözüm Öğeleri", "Çözüm Öğeleri", "{52944D7A-93A4-47C1-9880-37C98BBDD0BE}"
 	ProjectSection(SolutionItems) = preProject
+		deploy.ps1 = deploy.ps1
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
@@ -74,6 +79,10 @@ Global
 		{FFB7EA77-F24D-48F6-9BA8-9AC0DD643689}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFB7EA77-F24D-48F6-9BA8-9AC0DD643689}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFB7EA77-F24D-48F6-9BA8-9AC0DD643689}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FD0DF52-D7B7-48D1-901D-FDBDCDAFF581}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FD0DF52-D7B7-48D1-901D-FDBDCDAFF581}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FD0DF52-D7B7-48D1-901D-FDBDCDAFF581}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FD0DF52-D7B7-48D1-901D-FDBDCDAFF581}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,6 +103,8 @@ Global
 		{550A48F3-E24F-4807-9ECA-0EAAC4E20AEC} = {26942A0A-EEE9-49DD-B3D5-DAC28F5E2F87}
 		{C9D20078-9328-4F22-964B-D40AB2D74B55} = {2BF5DFFA-08A1-49F7-B2F7-5D08717B1037}
 		{FFB7EA77-F24D-48F6-9BA8-9AC0DD643689} = {C9D20078-9328-4F22-964B-D40AB2D74B55}
+		{6FA79193-FCFF-4B68-BBFE-AA05868624F6} = {2BF5DFFA-08A1-49F7-B2F7-5D08717B1037}
+		{3FD0DF52-D7B7-48D1-901D-FDBDCDAFF581} = {6FA79193-FCFF-4B68-BBFE-AA05868624F6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FAEFDB0F-E2F7-492A-AE5F-9401E0B82265}

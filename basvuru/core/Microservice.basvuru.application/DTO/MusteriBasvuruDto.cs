@@ -10,8 +10,7 @@ namespace Microservice.basvuru.application.DTO
 {
     public class MusteriBasvuruDto
     {
-        public string? MusteriNo { get; set; } 
-        public string MusteriBasvuru_UID { get; set; } 
+       
         public Tip Basvurutipi { get; set; }
 
         

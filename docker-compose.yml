@@ -1,0 +1,31 @@
+
+services:
+  userapi:
+    image: mcr.microsoft.com/dotnet/aspnet:8.0
+    container_name: userapi
+    ports:
+      - "5105:80"
+    volumes:
+      - ./Microservice.user.api/publish:/app
+    working_dir: /app
+    command: ["dotnet", "Microservice.user.api.dll"]  
+
+  basvuruapi:
+    image: mcr.microsoft.com/dotnet/aspnet:8.0
+    container_name: basvuruapi
+    ports:
+      - "5106:80"
+    volumes:
+      - ./Microservice.basvuru.api/publish:/app
+    working_dir: /app
+    command: ["dotnet", "Microservice.basvuru.api.dll"]
+
+  notificationapi:
+    image: mcr.microsoft.com/dotnet/aspnet:8.0
+    container_name: notificationapi
+    ports:
+      - "5107:80"
+    volumes:
+      - ./Microservice.notification.api/publish:/app
+    working_dir: /app
+    command: ["dotnet", "Microservice.notification.api.dll"]

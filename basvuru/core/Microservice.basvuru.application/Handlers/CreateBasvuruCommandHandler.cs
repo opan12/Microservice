@@ -21,9 +21,9 @@ public class CreateMusteriBasvuruCommandHandler : IRequestHandler<CreateMusteriB
     {
         var basvuru = new MusteriBasvuru
         {
-            MusteriBasvuru_UID = request.BasvuruDto.MusteriBasvuru_UID,  
+            MusteriBasvuru_UID = "request.BasvuruDto.MusteriBasvuru_UID",  
             Basvuru_UID = Guid.NewGuid(), 
-            MusteriNo = request.BasvuruDto.MusteriNo,
+            MusteriNo = "request.BasvuruDto.MusteriNo",
             BasvuruDurum = Durum.Beklemede,
             Basvurutipi = request.BasvuruDto.Basvurutipi,
             BasvuruTarihi = DateTime.Now,
