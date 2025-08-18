@@ -43,14 +43,14 @@ namespace Microservice.basvuru.api.Controllers
         }
         public class MusteriBasvuruRequest
         {
-            public int BasvuruTipi  { get; set; } // Client’tan gelen tek alan
+            public int BasvuruTipi  { get; set; } 
         }
 
 
         [HttpPost("musteriform")]
         public async Task<IActionResult> MusteriForm(
          [FromBody] MusteriBasvuruDto request,
-         [FromHeader(Name = "Session-Id")] string sessionId) 
+         [FromHeader(Name = "Session-Id")] string sessionId, [FromServices] RabbitMqProducer producer) 
         {
             var userData = _redisDb.StringGet(sessionId);
             if (userData.IsNullOrEmpty)
@@ -70,10 +70,14 @@ namespace Microservice.basvuru.api.Controllers
                 Kayit_Yapan = user.Username,           
                 Kayit_Zaman = DateTime.Now
             };
-
+            Console.WriteLine(basvuru);
             _context.Basvurular.Add(basvuru);
             await _context.SaveChangesAsync();
-            return Ok(new { message = "Başvuru odu ve kuyruğa eklendi." });
+            producer.SendMessage(basvuru, "basvuru_queue");
+
+
+
+            return Ok(new { message = "Başvuru okdu ve kuyruğa eklendi." });
         }
     }
 }

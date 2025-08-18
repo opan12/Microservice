@@ -34,8 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\basvuru\basvuru.api\Microservice.basvuru.api\Microservice.basvuru.api.csproj" />
     <ProjectReference Include="..\..\..\basvuru\core\Microservice.basvuru.application\Microservice.basvuru.application.csproj" />
+    <ProjectReference Include="..\..\..\Shared\Microservice.Shared.DTO\Microservice.Shared.DTO.csproj" />
 	  <None Update="appsettings*.json" CopyToPublishDirectory="Never" />
 
   </ItemGroup>

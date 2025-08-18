@@ -1,31 +1,26 @@
+version: '3.8'
 
 services:
-  userapi:
-    image: mcr.microsoft.com/dotnet/aspnet:8.0
-    container_name: userapi
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
     ports:
-      - "5105:80"
-    volumes:
-      - ./Microservice.user.api/publish:/app
-    working_dir: /app
-    command: ["dotnet", "Microservice.user.api.dll"]  
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - microservices
 
-  basvuruapi:
-    image: mcr.microsoft.com/dotnet/aspnet:8.0
-    container_name: basvuruapi
+  redis:
+    image: redis:latest
+    container_name: redis
     ports:
-      - "5106:80"
-    volumes:
-      - ./Microservice.basvuru.api/publish:/app
-    working_dir: /app
-    command: ["dotnet", "Microservice.basvuru.api.dll"]
+      - "6379:6379"
+    networks:
+      - microservices
 
-  notificationapi:
-    image: mcr.microsoft.com/dotnet/aspnet:8.0
-    container_name: notificationapi
-    ports:
-      - "5107:80"
-    volumes:
-      - ./Microservice.notification.api/publish:/app
-    working_dir: /app
-    command: ["dotnet", "Microservice.notification.api.dll"]
+networks:
+  microservices:
+    driver: bridge

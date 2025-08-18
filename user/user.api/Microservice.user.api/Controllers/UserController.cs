@@ -19,11 +19,15 @@ public class UserController : ControllerBase
 {
     private readonly MongoDbContext _mongoContext;
     private readonly IConfiguration _configuration;
+    private readonly IDatabase _redisDb;
+
 
     public UserController(MongoDbContext mongoContext, IConfiguration configuration)
     {
         _mongoContext = mongoContext;
         _configuration = configuration;
+        var redis = ConnectionMultiplexer.Connect("localhost:6379");
+        _redisDb = redis.GetDatabase();
 
     }
     [HttpPost("logindeneme")]
