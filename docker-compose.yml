@@ -1,26 +1,94 @@
-version: '3.8'
 
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
+  apigateway:
+    build:
+      context: .
+      dockerfile: Microservice.ApiGetAway/Dockerfile
     ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      - "5000:8080"
+    depends_on:
+      - userapi
+      - basvuruapi
+      - notification
     networks:
-      - microservices
+      - micro-net
+
+  userapi:
+    build:
+      context: .
+      dockerfile: user/user.api/Microservice.user.api/Dockerfile
+    ports:
+      - "5001:8080"
+    depends_on:
+      - redis
+      - mongo       
+
+    environment:
+      - Redis__Host=redis
+      - MongoSettings__ConnectionString=mongodb://mongo:27017
+
+    networks:
+      - micro-net
+
+  basvuruapi:
+    build:
+      context: .
+      dockerfile: basvuru/basvuru.api/Microservice.basvuru.api/Dockerfile
+    ports:
+      - "5003:8080"
+    depends_on:
+      - rabbitmq
+      - redis
+      - mongo
+    environment:
+      - Redis__Host=redis
+
+      - Redis__Port=6379
+      - RabbitMQ__Host=rabbitmq
+      - MongoSettings__ConnectionString=mongodb://mongo:27017
+
+    networks:
+      - micro-net
+
+
+  notification:
+    build:
+      context: .
+      dockerfile: Notification/Microservice.notification/Dockerfile
+    ports:
+      - "5002:8080"
+    depends_on:
+      - rabbitmq
+    environment:
+      - RabbitMQ__Host=rabbitmq
+    networks:
+      - micro-net
 
   redis:
     image: redis:latest
-    container_name: redis
     ports:
       - "6379:6379"
     networks:
-      - microservices
+      - micro-net
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - micro-net
+
+  
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - micro-net
 
 networks:
-  microservices:
+  micro-net:
     driver: bridge

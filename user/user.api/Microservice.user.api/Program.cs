@@ -61,7 +61,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAll");
 
-// Authentication middleware çaðrýsý
 app.UseAuthentication();
 
 app.UseAuthorization();

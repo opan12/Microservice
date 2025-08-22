@@ -1,20 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microservice.basvuru.infrastructure.Data;
-using Microservice.basvuru.domain.Entity;
-using Microservice.basvuru.application.Commands;
-using MediatR;
 using Microservice.basvuru.application.DTO;
-using Azure.Core;
+using Microservice.basvuru.domain.Entity;
 using Microservice.basvuru.domain.Enum;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
-using System.Security.Claims;
-using RabbitMQ.Client;
-using System.Text;
+using Microservice.basvuru.api;
 using Microservice.basvuru.api.Services;
+using Microservice.Shared.DTO;
 using StackExchange.Redis;
 using Newtonsoft.Json;
-using Microservice.Shared.DTO;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Threading.Tasks;
 
 namespace Microservice.basvuru.api.Controllers
 {
@@ -22,63 +18,66 @@ namespace Microservice.basvuru.api.Controllers
     [Route("api/[controller]")]
     public class BasvuruController : ControllerBase
     {
-        private readonly BasvuruDbContext _context;
+        private readonly MongoDbContext _mongoContext;
         private readonly IDatabase _redisDb;
+        private readonly ILogger<BasvuruController> _logger;
 
-        public BasvuruController(BasvuruDbContext context)
+        public BasvuruController(MongoDbContext mongoContext, IConfiguration configuration, ILogger<BasvuruController> logger)
         {
-            var redis = ConnectionMultiplexer.Connect("localhost:6379");
+            _mongoContext = mongoContext;
+            _logger = logger;
 
-            _context = context;
+            var redisHost = configuration["Redis:Host"];
+            var redisPort = configuration["Redis:Port"];
+            var redis = ConnectionMultiplexer.Connect($"{redisHost}:{redisPort},abortConnect=false");
             _redisDb = redis.GetDatabase();
-
-
         }
-
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var list = _context.Basvurular.ToList();
-            return Ok(list);
-        }
-        public class MusteriBasvuruRequest
-        {
-            public int BasvuruTipi  { get; set; } 
-        }
-
 
         [HttpPost("musteriform")]
         public async Task<IActionResult> MusteriForm(
-         [FromBody] MusteriBasvuruDto request,
-         [FromHeader(Name = "Session-Id")] string sessionId, [FromServices] RabbitMqProducer producer) 
+            [FromBody] MusteriBasvuruDto request,
+            [FromHeader(Name = "Session-Id")] string sessionId,
+            [FromServices] RabbitMqProducer producer)
         {
-            var userData = _redisDb.StringGet(sessionId);
-            if (userData.IsNullOrEmpty)
-                return Unauthorized("Session geçersiz veya süresi dolmuş");
-
-            var user = JsonConvert.DeserializeObject<UserSessionDto>(userData);
-
-            var basvuru = new MusteriBasvuru
+            try
             {
-                MusteriBasvuru_UID = user.UserId,      
-                Basvurutipi = request.Basvurutipi,     
-                BasvuruTarihi = DateTime.Now,
-                BasvuruDurum = Durum.Beklemede,
-                Kayit_Durum = "Aktif",
-                HataAciklama = "",
-                MusteriNo = user.MusteriNo,           
-                Kayit_Yapan = user.Username,           
-                Kayit_Zaman = DateTime.Now
-            };
-            Console.WriteLine(basvuru);
-            _context.Basvurular.Add(basvuru);
-            await _context.SaveChangesAsync();
-            producer.SendMessage(basvuru, "basvuru_queue");
+                var userData = _redisDb.StringGet(sessionId);
+                if (userData.IsNullOrEmpty)
+                    return Unauthorized("Session geçersiz veya süresi dolmuş");
 
+                var user = JsonConvert.DeserializeObject<UserSessionDto>(userData);
 
+                var basvuru = new MusteriBasvuru
+                {
+                    MusteriBasvuru_UID = user.UserId,
+                    Basvurutipi = request.Basvurutipi,
+                    BasvuruTarihi = DateTime.Now,
+                    BasvuruDurum = Durum.Beklemede,
+                    Kayit_Durum = "Aktif",
+                    HataAciklama = "",
+                    MusteriNo = user.MusteriNo,
+                    Kayit_Yapan = user.Username,
+                    Kayit_Zaman = DateTime.Now
+                };
 
-            return Ok(new { message = "Başvuru okdu ve kuyruğa eklendi." });
+                // MongoDB'ye ekleme
+                await _mongoContext.Basvurular.InsertOneAsync(basvuru);
+
+                // RabbitMQ kuyruğuna gönder
+                producer.SendMessage(basvuru, "basvuru_queue");
+
+                return Ok(new { message = "Başvuru okundu ve kuyruğa eklendi." });
+            }
+            catch (RedisConnectionException rex)
+            {
+                _logger.LogError(rex, "Redis bağlantı hatası.");
+                return StatusCode(500, new { message = "Redis bağlantı hatası.", detail = rex.Message });
+            }
+            catch (RabbitMQ.Client.Exceptions.BrokerUnreachableException rbx)
+            {
+                _logger.LogError(rbx, "RabbitMQ bağlantı hatası.");
+                return StatusCode(500, new { message = "RabbitMQ bağlantı hatası.", detail = rbx.Message });
+            }
         }
     }
 }
-

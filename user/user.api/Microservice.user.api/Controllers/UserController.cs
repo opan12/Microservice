@@ -26,7 +26,7 @@ public class UserController : ControllerBase
     {
         _mongoContext = mongoContext;
         _configuration = configuration;
-        var redis = ConnectionMultiplexer.Connect("localhost:6379");
+        var redis = ConnectionMultiplexer.Connect("redis:6379"); // Docker Compose servis adı
         _redisDb = redis.GetDatabase();
 
     }
@@ -49,7 +49,7 @@ public class UserController : ControllerBase
 
         var sessionId = Guid.NewGuid().ToString();
 
-        var redis = ConnectionMultiplexer.Connect("localhost:6379");
+        var redis = ConnectionMultiplexer.Connect("redis:6379"); 
         var db = redis.GetDatabase();
 
         db.StringSet(sessionId, JsonConvert.SerializeObject(userSession), TimeSpan.FromMinutes(30));
@@ -84,7 +84,7 @@ public class UserController : ControllerBase
 
         var sessionId = Guid.NewGuid().ToString();
 
-        var redis = ConnectionMultiplexer.Connect("localhost:6379");
+        var redis = ConnectionMultiplexer.Connect("redis:6379"); // Docker Compose servis adı
         var db = redis.GetDatabase();
 
         db.StringSet(sessionId, JsonConvert.SerializeObject(userSession), TimeSpan.FromMinutes(30));

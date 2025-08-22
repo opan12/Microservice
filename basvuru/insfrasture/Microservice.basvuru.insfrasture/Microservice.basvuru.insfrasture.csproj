@@ -23,4 +23,8 @@
     <ProjectReference Include="..\..\core\Microservice.basvuru.domain\Microservice.basvuru.domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repository\" />
+  </ItemGroup>
+
 </Project>

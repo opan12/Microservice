@@ -1,13 +1,17 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+COPY . .
 
-COPY *.csproj ./
-RUN dotnet restore
+WORKDIR "/src/Microservice.ApiGetAway"
+RUN dotnet restore "Microservice.ApiGetAway.csproj"
+RUN dotnet build "Microservice.ApiGetAway.csproj" -c Release -o /app/build
+RUN dotnet publish "Microservice.ApiGetAway.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-COPY . ./
-RUN dotnet publish -c Release -o /app/out
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/out .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Microservice.ApiGetAway.dll"]

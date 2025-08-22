@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
   </PropertyGroup>
 
@@ -34,7 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\basvuru\core\Microservice.basvuru.application\Microservice.basvuru.application.csproj" />
     <ProjectReference Include="..\..\..\Shared\Microservice.Shared.DTO\Microservice.Shared.DTO.csproj" />
 	  <None Update="appsettings*.json" CopyToPublishDirectory="Never" />
 
